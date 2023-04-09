@@ -6,7 +6,7 @@ export default function BlogSection({ blogs, user, handleDelete }) {
   const userId = user?.uid;
   return (
     <div>
-      <div className="blog-heading text-start py-2 mb-4">Blogs quotidiens</div>
+      <div className="blog-heading text-start py-2 mb-4">Derniers articles</div>
       {blogs?.map((item) => (
         <div className="row pb-5" key={item.id}>
           <div className="col-md-5">
