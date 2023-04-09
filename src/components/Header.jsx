@@ -33,7 +33,7 @@ export default function Header({ active, setActive, user, handleLogout }) {
                     }`}
                     onClick={() => setActive("home")}
                   >
-                    Home
+                    Accueil
                   </li>
                 </Link>
                 <Link to="/create" style={{ textDecoration: "none" }}>
@@ -43,7 +43,7 @@ export default function Header({ active, setActive, user, handleLogout }) {
                     }`}
                     onClick={() => setActive("create")}
                   >
-                    Create
+                    Créer post
                   </li>
                 </Link>
                 <Link to="/about" style={{ textDecoration: "none" }}>
@@ -53,7 +53,7 @@ export default function Header({ active, setActive, user, handleLogout }) {
                     }`}
                     onClick={() => setActive("about")}
                   >
-                    About
+                    A propos
                   </li>
                 </Link>
               </ul>
