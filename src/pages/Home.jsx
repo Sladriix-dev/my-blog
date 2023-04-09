@@ -3,6 +3,7 @@ import { useState, useEffect } from "react";
 import { db } from "../firebase";
 import BlogSection from "../components/BlogSection";
 import Spinner from "../components/Spinner";
+import { toast } from "react-toastify";
 
 export default function Home({ setActive, user }) {
   const [loading, setLoading] = useState(true);
@@ -38,6 +39,7 @@ export default function Home({ setActive, user }) {
       try {
         setLoading(true);
         await deleteDoc(doc(db, "blogs", id));
+        toast.success("Article supprimé avec succès");
         setLoading(false);
       } catch (err) {
         console.log(err);

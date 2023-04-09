@@ -1,10 +1,18 @@
 import { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import ReactTagInput from "@pathofdev/react-tag-input";
 import "@pathofdev/react-tag-input/build/index.css";
 import { getDownloadURL, ref, uploadBytesResumable } from "firebase/storage";
 import { db, storage } from "../firebase";
-import { addDoc, collection, serverTimestamp } from "firebase/firestore";
+import {
+  addDoc,
+  collection,
+  doc,
+  getDoc,
+  updateDoc,
+  serverTimestamp,
+} from "firebase/firestore";
+import { toast } from "react-toastify"
 
 const initialState = {
   title: "",
@@ -23,10 +31,12 @@ const categoryOption = [
   "Business",
 ];
 
-export default function AddEditBlog({user}) {
+export default function AddEditBlog({ user, setActive }) {
   const [form, setForm] = useState(initialState);
   const [file, setFile] = useState(null);
   const [progress, setProgress] = useState(null);
+
+  const { id } = useParams();
 
   const navigate = useNavigate();
 
@@ -60,6 +70,7 @@ export default function AddEditBlog({user}) {
         },
         () => {
           getDownloadURL(uploadTask.snapshot.ref).then((downloadUrl) => {
+            toast.info("Upload de l'image sur firebase réussi");
             setForm((prev) => ({ ...prev, imgUrl: downloadUrl }));
           });
         }
@@ -67,6 +78,19 @@ export default function AddEditBlog({user}) {
     };
     file && uploadFile();
   }, [file]);
+
+  useEffect(() => {
+    id && getBlogDetail();
+  }, [id]);
+
+  const getBlogDetail = async () => {
+    const docRef = doc(db, "blogs", id);
+    const snapshot = await getDoc(docRef);
+    if (snapshot.exists()) {
+      setForm({ ...snapshot.data() });
+    }
+    setActive(null);
+  };
 
   const handleChange = (e) => {
     setForm({ ...form, [e.target.name]: e.target.value });
@@ -86,17 +110,34 @@ export default function AddEditBlog({user}) {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if(category && tags && title && file && description && trending) {
+    if (category && tags && title && description && trending) {
+      if (!id) {
         try {
-            await addDoc(collection(db, "blogs"), {
-                ...form,
-                timestamp: serverTimestamp(),
-                author: user.displayName,
-                userId: user.uid
-            });
-        } catch(err) {
-            console.log(err);
+          await addDoc(collection(db, "blogs"), {
+            ...form,
+            timestamp: serverTimestamp(),
+            author: user.displayName,
+            userId: user.uid,
+          });
+          toast.success("Article publié avec succès")
+        } catch (err) {
+          console.log(err);
         }
+      } else {
+        try {
+            await updateDoc(doc(db, "blogs", id), {
+              ...form,
+              timestamp: serverTimestamp(),
+              author: user.displayName,
+              userId: user.uid,
+            });
+          toast.success("Article modifié avec succès")
+          } catch (err) {
+            console.log(err);
+          }
+      }
+    } else {
+        return toast.error("Tous les champs sont obligatoires");
     }
     navigate("/");
   };
@@ -105,7 +146,9 @@ export default function AddEditBlog({user}) {
     <div className="container-fluid mb-4">
       <div className="container">
         <div className="col-12">
-          <div className="text-center heading py-2">Créer Blog</div>
+          <div className="text-center heading py-2">
+            {id ? "Modifier le post" : "Créer un post"}
+          </div>
           <div className="row h-100 justify-content-center align-items-center">
             <div className="col-10 col-md-8 col-lg-6">
               <form className="row blog-form" onSubmit={handleSubmit}>
@@ -189,7 +232,7 @@ export default function AddEditBlog({user}) {
                     type="submit"
                     disabled={progress != null && progress < 100}
                   >
-                    Publier
+                    {id ? "Modifier" : "Publier"}
                   </button>
                 </div>
               </form>
