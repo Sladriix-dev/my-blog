@@ -16,7 +16,7 @@ const initialState = {
   confirmPassword: "",
 };
 
-export default function Auth({ setActive }) {
+export default function Auth({ setActive, setUser }) {
   const [state, setState] = useState(initialState);
   const [signUp, setSignUp] = useState(false);
 
@@ -37,6 +37,7 @@ export default function Auth({ setActive }) {
           email,
           password
         );
+        setUser(user);
         setActive("home");
       } else {
         if (password !== confirmPassword) {
